@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Queen 👑</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f1f, #24123d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .crown {
+            font-size: 55px;
+        }
+
+        h1 {
+            margin: 5px 0;
+            font-size: 38px;
+        }
+
+        .subtitle {
+            opacity: 0.7;
+        }
+
+        #chat {
+            height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .message {
+            margin: 12px 0;
+            padding: 12px 16px;
+            border-radius: 15px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .user {
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .queen {
+            margin-right: auto;
+            background: rgba(100, 70, 180, 0.35);
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            outline: none;
+            font-size: 16px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 18px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #send {
+            background: white;
+            color: #24123d;
+        }
+
+        #mic {
+            background: #6c45b8;
+            color: white;
+            font-size: 20px;
+        }
+
+        #stop {
+            background: #444;
+            color: white;
+        }
+
+        button:hover {
+            transform: scale(1.03);
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 15px;
+            opacity: 0.7;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div class="crown">👑</div>
+        <h1>Royal Queen</h1>
+        <div class="subtitle">Your Personal AI Assistant</div>
+    </div>
+
+    <div id="chat">
+        <div class="message queen">
+            👑 Hello! I am Royal Queen. How may I assist you?
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input
+            id="message"
+            type="text"
+            placeholder="Ask Royal Queen something..."
+        >
+
+        <button id="mic" onclick="startListening()">🎤</button>
+
+        <button id="send" onclick="sendMessage()">Send</button>
+
+        <button id="stop" onclick="stopSpeaking()">🔇</button>
+    </div>
+
+    <div id="status">Ready</div>
+
+</div>
+
+<script>
+
+const input = document.getElementById("message");
+const chat = document.getElementById("chat");
+const statusText = document.getElementById("status");
+
+
+// -----------------------------
+// TEXT MESSAGE
+// -----------------------------
+
+function sendMessage() {
+
+    const message = input.value.trim();
+
+    if (message === "") return;
+
+    addMessage(message, "user");
+
+    input.value = "";
+
+    // Temporary response
+    const response =
+        "I heard you say: " + message +
+        ". My AI brain will be connected soon. 👑";
+
+    setTimeout(() => {
+
+        addMessage(response, "queen");
+
+        speak(response);
+
+    }, 500);
+}
+
+
+// -----------------------------
+// ADD MESSAGE
+// -----------------------------
+
+function addMessage(text, type) {
+
+    const div = document.createElement("div");
+
+    div.className = "message " + type;
+
+    div.textContent = text;
+
+    chat.appendChild(div);
+
+    chat.scrollTop = chat.scrollHeight;
+}
+
+
+// -----------------------------
+// VOICE RECOGNITION
+// -----------------------------
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+let recognition;
+
+if (SpeechRecognition) {
+
+    recognition = new SpeechRecognition();
+
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-IN";
+
+    recognition.onstart = function() {
+
+        statusText.textContent = "🎤 Listening...";
+
+    };
+
+    recognition.onresult = function(event) {
+
+        const transcript =
+            event.results[0][0].transcript;
+
+        input.value = transcript;
+
+        statusText.textContent = "Processing...";
+
+        sendMessage();
+
+    };
+
+    recognition.onerror = function() {
+
+        statusText.textContent =
+            "Could not hear you. Please try again.";
+
+    };
+
+    recognition.onend = function() {
+
+        if (statusText.textContent === "🎤 Listening...") {
+            statusText.textContent = "Ready";
+        }
+
+    };
+
+} else {
+
+    statusText.textContent =
+        "Voice recognition is not supported by this browser.";
+
+}
+
+
+function startListening() {
+
+    if (!recognition) {
+
+        alert(
+            "Voice recognition is not supported in this browser."
+        );
+
+        return;
+    }
+
+    recognition.start();
+
+}
+
+
+// -----------------------------
+// TEXT TO SPEECH
+// -----------------------------
+
+function speak(text) {
+
+    if (!("speechSynthesis" in window)) return;
+
+    window.speechSynthesis.cancel();
+
+    const speech =
+        new SpeechSynthesisUtterance(text);
+
+    speech.lang = "en-IN";
+    speech.rate = 1;
+    speech.pitch = 1;
+
+    window.speechSynthesis.speak(speech);
+
+    statusText.textContent = "🔊 Speaking...";
+
+    speech.onend = function() {
+
+        statusText.textContent = "Ready";
+
+    };
+}
+
+
+// -----------------------------
+// STOP SPEAKING
+// -----------------------------
+
+function stopSpeaking() {
+
+    window.speechSynthesis.cancel();
+
+    statusText.textContent = "Ready";
+
+}
+
+
+// -----------------------------
+// ENTER KEY
+// -----------------------------
+
+input.addEventListener("keydown", function(event) {
+
+    if (event.key === "Enter") {
+
+        sendMessage();
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
